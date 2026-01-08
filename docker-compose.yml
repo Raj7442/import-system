@@ -1,1 +1,32 @@
+version: "3.8"
+services:
+  api:
+    build: ./backend/api-gateway
+    ports:
+      - "3000:3000"
+    env_file: .env
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    build: ./backend/worker
+    env_file: .env
+    depends_on:
+      - redis
+      - postgres
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_DB: images
+      POSTGRES_PASSWORD: password
+
+  redis:
+    image: redis
 
