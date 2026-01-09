@@ -1,4 +1,5 @@
-const API = "http://localhost:3000";
+const API =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export const importImages = (folderUrl) =>
   fetch(`${API}/import/google-drive`, {
@@ -8,5 +9,4 @@ export const importImages = (folderUrl) =>
   });
 
 export const fetchImages = () =>
-  fetch(`${API}/images`).then(res => res.json());
-
+  fetch(`${API}/images`).then((res) => res.json());

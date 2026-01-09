@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   api:
     build: ./backend/api-gateway
@@ -25,8 +26,10 @@ services:
     image: postgres
     environment:
       POSTGRES_DB: images
+      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
+    volumes:
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
 
   redis:
     image: redis
-
