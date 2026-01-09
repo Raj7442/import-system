@@ -1,12 +1,16 @@
 import ImportForm from "./ImportForm";
 import ImageList from "./ImageList";
+import "./App.css";
 
 export default function App() {
   return (
-    <>
-      <h1>Image Importer</h1>
+    <div className="app">
+      <header className="header">
+        <h1>Image Import System</h1>
+        <p>Import images from Google Drive to cloud storage</p>
+      </header>
       <ImportForm />
       <ImageList />
-    </>
+    </div>
   );
 }

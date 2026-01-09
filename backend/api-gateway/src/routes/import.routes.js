@@ -18,12 +18,25 @@ router.post("/google-drive", async (req, res) => {
       return res.status(400).json({ error: "Folder URL required" });
     }
 
-    await queue.add("import-job", { folderUrl });
+    if (!folderUrl.includes("drive.google.com") || !folderUrl.includes("/folders/")) {
+      return res.status(400).json({ error: "Invalid Google Drive folder URL" });
+    }
 
-    res.json({ message: "Import started" });
+    const job = await queue.add("import-job", { folderUrl }, {
+      attempts: 3,
+      backoff: {
+        type: "exponential",
+        delay: 2000,
+      },
+    });
+
+    res.json({ 
+      message: "Import started",
+      jobId: job.id 
+    });
   } catch (err) {
     console.error("Queue error:", err);
-    res.status(500).json({ error: "Failed to start import" });
+    res.status(500).json({ error: "Failed to start import", details: err.message });
   }
 });
 

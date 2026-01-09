@@ -6,7 +6,6 @@ import imageRoutes from "./routes/images.routes.js";
 
 const app = express();
 
-/* ✅ FIX CORS PROPERLY */
 app.use(
   cors({
     origin: "http://localhost:5173",
