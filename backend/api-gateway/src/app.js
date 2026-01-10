@@ -8,13 +8,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "*", // 👈 IMPORTANT FOR PRODUCTION
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   })
 );
 
 app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
 
 app.use("/import", importRoutes);
 app.use("/images", imageRoutes);
