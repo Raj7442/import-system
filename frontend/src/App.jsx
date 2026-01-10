@@ -1,6 +1,5 @@
 import ImportForm from "./ImportForm";
 import ImageList from "./ImageList";
-<<<<<<< HEAD
 import "./App.css";
 
 export default function App() {
@@ -13,15 +12,5 @@ export default function App() {
       <ImportForm />
       <ImageList />
     </div>
-=======
-
-export default function App() {
-  return (
-    <>
-      <h1>Image Importer</h1>
-      <ImportForm />
-      <ImageList />
-    </>
->>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
   );
 }

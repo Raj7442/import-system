@@ -1,8 +1,5 @@
 node_modules/
 .env
-<<<<<<< HEAD
 .env.bak
 .env.*
-=======
->>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
 dist/

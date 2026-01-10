@@ -10,8 +10,3 @@ router.get("/", async (_, res) => {
 
 export default router;
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
