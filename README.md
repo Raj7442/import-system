@@ -7,6 +7,7 @@ A scalable, multi-service backend system that imports images from a public Googl
 ## 🚀 Live Application
 
 **Frontend:** https://chic-joy-production.up.railway.app/
+
 **Backend API:** https://humorous-amazement-production-7ced.up.railway.app/
 
 ---
