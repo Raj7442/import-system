@@ -8,6 +8,18 @@ RUN npm run build
 
 # Serve stage
 FROM nginx:alpine
+
+# Remove default config
+RUN rm /etc/nginx/conf.d/default.conf
+
+# Copy our custom nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copy built frontend
 COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
+
+# Expose Railway port
+EXPOSE 8080
+
+# Start nginx
 CMD ["nginx", "-g", "daemon off;"]
