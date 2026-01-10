@@ -56,6 +56,7 @@ This system follows a **multi-service architecture** to ensure scalability, faul
    - Displays list of imported images
 
 ---
+<<<<<<< HEAD
 
 ## 🚀 Setup Instructions
 
@@ -264,3 +265,5 @@ curl http://localhost:3000/images
 A Postman collection is available in the repository root (if provided) with pre-configured requests.
 
 ---
+=======
+>>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9

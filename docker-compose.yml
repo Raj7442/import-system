@@ -6,10 +6,13 @@ services:
     ports:
       - "3000:3000"
     env_file: .env
+<<<<<<< HEAD
     environment:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/images
       REDIS_HOST: redis
       REDIS_PORT: 6379
+=======
+>>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
     depends_on:
       - postgres
       - redis
@@ -17,10 +20,13 @@ services:
   worker:
     build: ./backend/worker
     env_file: .env
+<<<<<<< HEAD
     environment:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/images
       REDIS_HOST: redis
       REDIS_PORT: 6379
+=======
+>>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
     depends_on:
       - redis
       - postgres
@@ -31,13 +37,18 @@ services:
       - "5173:80"
 
   postgres:
+<<<<<<< HEAD
     image: postgres:15-alpine
+=======
+    image: postgres
+>>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
     environment:
       POSTGRES_DB: images
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     volumes:
       - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+<<<<<<< HEAD
     ports:
       - "5432:5432"
     healthcheck:
@@ -55,3 +66,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+=======
+
+  redis:
+    image: redis
+>>>>>>> 06d37f68f9d67736815b83a234c72d1cd96eb3e9
