@@ -2,10 +2,14 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY backend/api-gateway/package*.json ./
+# Copy package files (already in api-gateway directory)
+COPY package*.json ./
+
+# Install dependencies
 RUN npm install
 
-COPY backend/api-gateway .
+# Copy source code (already in api-gateway directory)
+COPY . ./
 
 EXPOSE 3000
 
