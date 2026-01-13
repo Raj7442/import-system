@@ -1,21 +1,28 @@
-# Build stage
-FROM node:18-alpine AS build
+FROM node:18-alpine AS builder
+
 WORKDIR /app
+
 COPY package*.json ./
 RUN npm install
+
 COPY . .
+
+# Accept build argument and set as environment variable
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+# Build the app
 RUN npm run build
 
-# Serve stage
+# Production stage
 FROM nginx:alpine
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copy template so nginx can envsubst $PORT
+# Copy custom nginx config if you have one
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
-# Copy built frontend
-COPY --from=build /app/dist /usr/share/nginx/html
+# Copy built files
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
