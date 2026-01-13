@@ -9,7 +9,7 @@ export default function ImageList({ refreshTrigger }) {
 
   useEffect(() => {
     loadImages();
-    const interval = setInterval(loadImages, 3000);
+    const interval = setInterval(loadImages, 3000); // Check every 3 seconds
     return () => clearInterval(interval);
   }, [refreshTrigger]);
 
@@ -17,9 +17,10 @@ export default function ImageList({ refreshTrigger }) {
     try {
       const data = await fetchImages();
       
+      // Check if new images were added
       if (data.length > lastCount && lastCount > 0) {
         setImportComplete(true);
-        setTimeout(() => setImportComplete(false), 5000);
+        setTimeout(() => setImportComplete(false), 5000); // Hide after 5 seconds
       }
       
       setImages(data);
@@ -53,7 +54,11 @@ export default function ImageList({ refreshTrigger }) {
       <h2 className="card-title">
         <span>🖼️</span>
         Imported Images
-        {images.length > 0 && <span style={{ marginLeft: "auto", fontSize: "1rem", fontWeight: "normal", color: "#666" }}>({images.length})</span>}
+        {images.length > 0 && (
+          <span style={{ marginLeft: "auto", fontSize: "1rem", fontWeight: "normal", color: "#666" }}>
+            ({images.length} {images.length === 1 ? 'image' : 'images'})
+          </span>
+        )}
       </h2>
 
       {importComplete && (
@@ -87,6 +92,7 @@ export default function ImageList({ refreshTrigger }) {
                 {formatFileSize(images.reduce((sum, img) => sum + (img.size || 0), 0))}
               </div>
               <div className="stat-label">Total Size</div>
+            </div>
             <div className="stat-item">
               <div className="stat-value">
                 <span className="live-indicator">•</span> Live

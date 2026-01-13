@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { importImages } from "./api";
 
-export default function ImportForm() {
+export default function ImportForm({ onImportComplete }) {
   const [folderUrl, setFolderUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
+  const [importStatus, setImportStatus] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -15,13 +16,23 @@ export default function ImportForm() {
       setLoading(true);
       setMessage("");
       setMessageType("");
+      setImportStatus("Starting import...");
+      
       await importImages(folderUrl);
+      
       setMessage("Import started successfully. Images are being processed in the background.");
       setMessageType("success");
-      setFolderUrl("");
+      setImportStatus("Processing images...");
+      setFolderUrl(""); // Clear the input field
+      
+      // Notify parent component
+      if (onImportComplete) {
+        onImportComplete();
+      }
     } catch (err) {
       setMessage("Failed to start import. Please check the URL and try again.");
       setMessageType("error");
+      setImportStatus("");
     } finally {
       setLoading(false);
     }
@@ -63,6 +74,11 @@ export default function ImportForm() {
             )}
           </button>
         </div>
+        {importStatus && (
+          <div className="import-status">
+            <span>⏳</span> {importStatus}
+          </div>
+        )}
         {message && (
           <div className={`message ${messageType === "success" ? "message-success" : "message-error"}`}>
             {message}
