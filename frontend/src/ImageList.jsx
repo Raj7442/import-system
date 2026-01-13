@@ -8,6 +8,7 @@ export default function ImageList({ refreshTrigger }) {
   const [importComplete, setImportComplete] = useState(false);
 
   useEffect(() => {
+    setLastCount(0); // Reset counter on component mount
     loadImages();
     const interval = setInterval(loadImages, 3000);
     return () => clearInterval(interval);
@@ -81,18 +82,6 @@ export default function ImageList({ refreshTrigger }) {
             <div className="stat-item">
               <div className="stat-value">{images.length}</div>
               <div className="stat-label">Total Images</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">
-                {formatFileSize(images.reduce((sum, img) => sum + (img.size || 0), 0))}
-              </div>
-              <div className="stat-label">Total Size</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">
-                <span className="live-indicator">•</span> Live
-              </div>
-              <div className="stat-label">Auto-refresh</div>
             </div>
           </div>
           <div className="images-grid">
