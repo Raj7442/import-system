@@ -8,14 +8,14 @@ A scalable, multi-service backend system that imports images from a public Googl
 
 **Frontend:** https://chic-joy-production.up.railway.app/
 
-**Backend API:** https://humorous-amazement-production-7ced.up.railway.app/
+**Backend API:** https://import-system-production.up.railway.app/
 
 ---
 
 ## 📌 Features
 
 - Import images from a **public Google Drive folder**
-- Upload images to **cloud object storage (AWS S3)**
+- Upload images to **cloud object storage (Cloudinary)**
 - Persist image metadata in a **SQL database (PostgreSQL)**
 - Asynchronous, scalable processing for **large imports (10,000+ images)**
 - REST APIs for importing and listing images
@@ -38,7 +38,7 @@ This system follows a **multi-service architecture** to ensure scalability, faul
 2. **Import Worker**
    - Consumes jobs asynchronously
    - Fetches images from Google Drive
-   - Uploads images to AWS S3
+   - Uploads images to Cloudinary
    - Stores metadata in PostgreSQL
 
 3. **PostgreSQL**
@@ -63,7 +63,7 @@ This system follows a **multi-service architecture** to ensure scalability, faul
 ### Prerequisites
 
 - Docker and Docker Compose
-- AWS Account with S3 bucket (or MinIO for local development)
+- Cloudinary Account (free tier available)
 - Google Cloud Project with Drive API enabled
 - Node.js 18+ (for local development)
 
@@ -79,11 +79,10 @@ DATABASE_URL=postgresql://postgres:password@postgres:5432/images
 REDIS_HOST=redis
 REDIS_PORT=6379
 
-# AWS S3 Configuration
-AWS_ACCESS_KEY_ID=your_aws_access_key_id
-AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
-AWS_REGION=us-east-1
-S3_BUCKET=your_s3_bucket_name
+# Cloudinary Configuration
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
 # Google Drive API
 GOOGLE_API_KEY=your_google_api_key
@@ -131,7 +130,7 @@ The system is designed to be deployed on any container orchestration platform:
 ### Base URL
 
 - Local: `http://localhost:3000`
-- Production: `https://image-import-api.onrender.com`
+- Production: `https://import-system-production.up.railway.app`
 
 ### Endpoints
 
@@ -182,7 +181,7 @@ Returns a list of all imported images with their metadata.
     "google_drive_id": "file-id-123",
     "size": 1024000,
     "mime_type": "image/jpeg",
-    "storage_path": "https://s3.amazonaws.com/bucket/folder-id/file-id-123_image.jpg",
+    "storage_path": "https://res.cloudinary.com/your-cloud/image/upload/v1234567890/folder-id/file-id-123_image.jpg",
     "created_at": "2024-01-01T00:00:00.000Z"
   }
 ]
@@ -225,16 +224,16 @@ curl http://localhost:3000/images
    - Connection pooling for efficient database access
 
 6. **Cloud Storage**
-   - Direct uploads to S3 (no intermediate storage)
+   - Direct uploads to Cloudinary (no intermediate storage)
    - Files are organized by folder ID to avoid conflicts
-   - Public read access for easy retrieval
+   - Public URLs for easy retrieval
 
 ### Scaling Recommendations
 
 - **Horizontal Scaling**: Add more worker instances to process jobs faster
 - **Database**: Use read replicas for the `/images` endpoint if needed
 - **Redis**: Use Redis Cluster for high availability
-- **S3**: Configure lifecycle policies and CDN (CloudFront) for better performance
+- **Cloudinary**: Automatic CDN and image optimization
 - **Monitoring**: Add job monitoring (BullMQ Dashboard) to track progress
 
 ---
