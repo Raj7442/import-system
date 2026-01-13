@@ -8,10 +8,18 @@ export default function ImportForm({ onImportComplete }) {
   const [messageType, setMessageType] = useState("");
   const [importStatus, setImportStatus] = useState("");
   const [activeImports, setActiveImports] = useState([]);
+  const [processedUrls, setProcessedUrls] = useState(new Set());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!folderUrl) return;
+
+    // Check if URL is already being processed or was recently processed
+    if (processedUrls.has(folderUrl)) {
+      setMessage("This folder is already being processed or was recently imported.");
+      setMessageType("error");
+      return;
+    }
 
     const importId = Date.now();
     
@@ -21,8 +29,9 @@ export default function ImportForm({ onImportComplete }) {
       setMessageType("");
       setImportStatus("Starting import...");
       
-      // Add to active imports
+      // Add to active imports and processed URLs
       setActiveImports(prev => [...prev, { id: importId, url: folderUrl, status: "Starting..." }]);
+      setProcessedUrls(prev => new Set([...prev, folderUrl]));
       
       await importImages(folderUrl);
       
@@ -39,6 +48,14 @@ export default function ImportForm({ onImportComplete }) {
       // Remove from active imports after 30 seconds and show completion
       setTimeout(() => {
         setActiveImports(prev => prev.filter(imp => imp.id !== importId));
+        // Remove from processed URLs after 5 minutes to allow re-import later
+        setTimeout(() => {
+          setProcessedUrls(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(folderUrl);
+            return newSet;
+          });
+        }, 300000); // 5 minutes
         setMessage("✅ Import completed successfully! Images uploaded to cloud storage.");
         setMessageType("success");
         setTimeout(() => {
@@ -55,6 +72,11 @@ export default function ImportForm({ onImportComplete }) {
       setMessageType("error");
       setImportStatus("");
       setActiveImports(prev => prev.filter(imp => imp.id !== importId));
+      setProcessedUrls(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(folderUrl);
+        return newSet;
+      });
     } finally {
       setLoading(false);
     }
