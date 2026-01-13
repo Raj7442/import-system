@@ -31,8 +31,8 @@ export default function ImportForm({ onImportComplete }) {
         imp.id === importId ? { ...imp, status: "Processing..." } : imp
       ));
       
-      setMessage("");
-      setMessageType("");
+      setMessage("Import started successfully. Images are being processed in the background.");
+      setMessageType("success");
       setImportStatus("");
       setFolderUrl(""); // Clear the input field
       
