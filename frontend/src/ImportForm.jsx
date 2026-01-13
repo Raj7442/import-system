@@ -31,14 +31,20 @@ export default function ImportForm({ onImportComplete }) {
         imp.id === importId ? { ...imp, status: "Processing..." } : imp
       ));
       
-      setMessage("Import started successfully. Images are being processed in the background.");
-      setMessageType("success");
+      setMessage("");
+      setMessageType("");
       setImportStatus("");
       setFolderUrl(""); // Clear the input field
       
-      // Remove from active imports after 30 seconds
+      // Remove from active imports after 30 seconds and show completion
       setTimeout(() => {
         setActiveImports(prev => prev.filter(imp => imp.id !== importId));
+        setMessage("✅ Import completed successfully! Images uploaded to cloud storage.");
+        setMessageType("success");
+        setTimeout(() => {
+          setMessage("");
+          setMessageType("");
+        }, 5000);
       }, 30000);
       
       if (onImportComplete) {
