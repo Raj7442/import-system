@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { google } from "googleapis";
-import AWS from "aws-sdk";
+import { Storage } from "@google-cloud/storage";
 import fetch from "node-fetch";
 import pkg from "pg";
 import { Buffer } from "buffer";
@@ -16,18 +16,17 @@ pool.on("error", (err) => {
   console.error("PostgreSQL connection error:", err);
 });
 
-/* -------------------- AWS S3 -------------------- */
-if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-  console.warn("AWS credentials not set. S3 uploads will fail.");
+/* -------------------- Google Cloud Storage -------------------- */
+if (!process.env.GOOGLE_API_KEY) {
+  console.warn("GOOGLE_API_KEY not set. Google Cloud Storage will fail.");
 }
 
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION || "us-east-1",
+const storage = new Storage({
+  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Optional: for service account
+  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
 });
 
-const s3 = new AWS.S3();
+const bucket = storage.bucket(process.env.GCS_BUCKET || 'image-import-bucket-2025');
 
 /* -------------------- Google Drive -------------------- */
 if (!process.env.GOOGLE_API_KEY) {
@@ -42,10 +41,9 @@ const drive = google.drive({
 console.log("Worker starting...");
 console.log("Environment check:");
 console.log("  - DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Missing");
-console.log("  - AWS_ACCESS_KEY_ID:", process.env.AWS_ACCESS_KEY_ID ? "Set" : "Missing");
-console.log("  - AWS_SECRET_ACCESS_KEY:", process.env.AWS_SECRET_ACCESS_KEY ? "Set" : "Missing");
-console.log("  - S3_BUCKET:", process.env.S3_BUCKET ? "Set" : "Missing");
 console.log("  - GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? "Set" : "Missing");
+console.log("  - GCS_BUCKET:", process.env.GCS_BUCKET ? "Set" : "Missing");
+console.log("  - GOOGLE_CLOUD_PROJECT_ID:", process.env.GOOGLE_CLOUD_PROJECT_ID ? "Set" : "Missing");
 console.log("  - REDIS_URL:", process.env.REDIS_URL ? "Set" : "Missing");
 
 /* -------------------- BullMQ Worker -------------------- */
@@ -112,20 +110,19 @@ new Worker(
 
           const buffer = Buffer.from(await download.arrayBuffer());
 
-          if (!process.env.S3_BUCKET) {
-            throw new Error("S3_BUCKET not set");
-          }
+          // Upload to Google Cloud Storage
+          const fileName = `${folderId}/${file.id}_${file.name}`;
+          const gcsFile = bucket.file(fileName);
+          
+          await gcsFile.save(buffer, {
+            metadata: {
+              contentType: file.mimeType || 'image/jpeg',
+            },
+            public: true, // Make file publicly accessible
+          });
 
-          const s3Key = `${folderId}/${file.id}_${file.name}`;
-
-          const uploadResult = await s3
-            .upload({
-              Bucket: process.env.S3_BUCKET,
-              Key: s3Key,
-              Body: buffer,
-              ContentType: file.mimeType || "image/jpeg",
-            })
-            .promise();
+          // Get public URL
+          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
 
           await pool.query(
             `
@@ -144,7 +141,7 @@ new Worker(
               file.id,
               file.size || 0,
               file.mimeType || "image/jpeg",
-              uploadResult.Location,
+              publicUrl,
             ]
           );
 
