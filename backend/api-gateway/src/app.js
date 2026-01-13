@@ -11,6 +11,7 @@ const allowedOrigins = [
   'http://localhost:5173',  // Local Vite dev server
   'http://localhost:3000',  // Local alternative
   'https://chic-joy-production.up.railway.app',  // Your production frontend
+  'https://import-system-production.up.railway.app',  // Your backend (for testing)
   process.env.FRONTEND_URL  // Environment variable for flexibility
 ].filter(Boolean);  // Remove undefined values
 
