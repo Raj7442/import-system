@@ -37,3 +37,19 @@ export const fetchImages = async () => {
 
   return res.json();
 };
+
+/**
+ * Clear all imported images
+ */
+export const clearAllImages = async () => {
+  const res = await fetch(`${API}/images`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(errorText || "Failed to clear images");
+  }
+
+  return res.json();
+};

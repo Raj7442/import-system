@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { fetchImages } from "./api";
+import { fetchImages, clearAllImages } from "./api";
 
 export default function ImageList({ refreshTrigger }) {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastCount, setLastCount] = useState(0);
   const [importComplete, setImportComplete] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     setLastCount(0); // Reset counter on component mount
@@ -32,6 +33,24 @@ export default function ImageList({ refreshTrigger }) {
     }
   };
 
+  const handleClearAll = async () => {
+    if (!window.confirm("Are you sure you want to clear all imported images? This cannot be undone.")) {
+      return;
+    }
+
+    try {
+      setClearing(true);
+      await clearAllImages();
+      setImages([]);
+      setLastCount(0);
+    } catch (err) {
+      console.error("Failed to clear images:", err);
+      alert("Failed to clear images. Please try again.");
+    } finally {
+      setClearing(false);
+    }
+  };
+
   const formatFileSize = (bytes) => {
     if (!bytes) return "Unknown";
     const kb = bytes / 1024;
@@ -54,7 +73,19 @@ export default function ImageList({ refreshTrigger }) {
       <h2 className="card-title">
         <span>🖼️</span>
         Imported Images
-        {images.length > 0 && <span style={{ marginLeft: "auto", fontSize: "1rem", fontWeight: "normal", color: "#666" }}>({images.length})</span>}
+        {images.length > 0 && (
+          <>
+            <span style={{ marginLeft: "auto", fontSize: "1rem", fontWeight: "normal", color: "#666" }}>({images.length})</span>
+            <button 
+              onClick={handleClearAll}
+              disabled={clearing}
+              className="btn btn-danger"
+              style={{ marginLeft: "10px", fontSize: "0.8rem", padding: "4px 8px" }}
+            >
+              {clearing ? "Clearing..." : "🗑️ Clear All"}
+            </button>
+          </>
+        )}
       </h2>
 
       {importComplete && (
