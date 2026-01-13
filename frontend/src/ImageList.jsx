@@ -90,7 +90,7 @@ export default function ImageList({ refreshTrigger }) {
 
       {importComplete && (
         <div className="completion-message">
-          ✅ Import completed! {images.length - lastCount} new images added.
+          ✅ Import completed successfully! {images.length - lastCount} new images uploaded to cloud storage.
         </div>
       )}
 
