@@ -1,4 +1,7 @@
-const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? 
+    "https://humorous-amazement-production-7ced.up.railway.app" : 
+    "http://localhost:3000");
 
 /**
  * Start Google Drive import

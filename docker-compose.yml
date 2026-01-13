@@ -10,6 +10,7 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/images
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
     depends_on:
       - postgres
       - redis
@@ -21,12 +22,16 @@ services:
       DATABASE_URL: postgresql://postgres:password@postgres:5432/images
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
     depends_on:
       - redis
       - postgres
 
   frontend:
-    build: ./frontend
+    build: 
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:3000
     ports:
       - "5173:80"
 
