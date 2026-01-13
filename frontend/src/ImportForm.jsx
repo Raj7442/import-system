@@ -61,7 +61,7 @@ export default function ImportForm({ onImportComplete }) {
         setTimeout(() => {
           setMessage("");
           setMessageType("");
-        }, 7000);
+        }, 3000);
       }, 7000);
       
       if (onImportComplete) {
