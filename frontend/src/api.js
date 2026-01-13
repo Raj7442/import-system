@@ -7,6 +7,7 @@ const API = import.meta.env.VITE_API_BASE_URL ||
  * Start Google Drive import
  */
 export const importImages = async (folderUrl) => {
+  console.log('API URL:', API); // Debug log
   const res = await fetch(`${API}/import/google-drive`, {
     method: "POST",
     headers: {
@@ -17,6 +18,7 @@ export const importImages = async (folderUrl) => {
 
   if (!res.ok) {
     const errorText = await res.text();
+    console.error('API Error:', res.status, errorText); // Debug log
     throw new Error(errorText || "Failed to start import");
   }
 
@@ -27,9 +29,12 @@ export const importImages = async (folderUrl) => {
  * Fetch imported images
  */
 export const fetchImages = async () => {
+  console.log('Fetching images from:', `${API}/images`); // Debug log
   const res = await fetch(`${API}/images`);
 
   if (!res.ok) {
+    const errorText = await res.text();
+    console.error('Fetch images error:', res.status, errorText); // Debug log
     throw new Error("Failed to fetch images");
   }
 
