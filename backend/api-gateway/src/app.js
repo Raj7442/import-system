@@ -34,6 +34,10 @@ app.use(
 
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("API is running 🚀");
+});
+
 app.use("/import", importRoutes);
 app.use("/images", imageRoutes);
 
