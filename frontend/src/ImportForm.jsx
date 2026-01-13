@@ -7,25 +7,40 @@ export default function ImportForm({ onImportComplete }) {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
   const [importStatus, setImportStatus] = useState("");
+  const [activeImports, setActiveImports] = useState([]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!folderUrl) return;
 
+    const importId = Date.now();
+    
     try {
       setLoading(true);
       setMessage("");
       setMessageType("");
       setImportStatus("Starting import...");
       
+      // Add to active imports
+      setActiveImports(prev => [...prev, { id: importId, url: folderUrl, status: "Starting..." }]);
+      
       await importImages(folderUrl);
+      
+      // Update import status
+      setActiveImports(prev => prev.map(imp => 
+        imp.id === importId ? { ...imp, status: "Processing..." } : imp
+      ));
       
       setMessage("Import started successfully. Images are being processed in the background.");
       setMessageType("success");
-      setImportStatus("Processing images...");
+      setImportStatus("");
       setFolderUrl(""); // Clear the input field
       
-      // Notify parent component
+      // Remove from active imports after 30 seconds
+      setTimeout(() => {
+        setActiveImports(prev => prev.filter(imp => imp.id !== importId));
+      }, 30000);
+      
       if (onImportComplete) {
         onImportComplete();
       }
@@ -33,6 +48,7 @@ export default function ImportForm({ onImportComplete }) {
       setMessage("Failed to start import. Please check the URL and try again.");
       setMessageType("error");
       setImportStatus("");
+      setActiveImports(prev => prev.filter(imp => imp.id !== importId));
     } finally {
       setLoading(false);
     }
@@ -53,13 +69,12 @@ export default function ImportForm({ onImportComplete }) {
               placeholder="https://drive.google.com/drive/folders/..."
               value={folderUrl}
               onChange={(e) => setFolderUrl(e.target.value)}
-              disabled={loading}
             />
           </div>
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={loading || !folderUrl.trim()}
+            disabled={!folderUrl.trim()}
           >
             {loading ? (
               <>
@@ -74,6 +89,17 @@ export default function ImportForm({ onImportComplete }) {
             )}
           </button>
         </div>
+        {activeImports.length > 0 && (
+          <div className="active-imports">
+            <h4>Active Imports:</h4>
+            {activeImports.map(imp => (
+              <div key={imp.id} className="import-item">
+                <span>📁 {imp.url.split('/').pop()}</span>
+                <span className="import-item-status">⏳ {imp.status}</span>
+              </div>
+            ))}
+          </div>
+        )}
         {importStatus && (
           <div className="import-status">
             <span>⏳</span> {importStatus}
