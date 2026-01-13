@@ -45,7 +45,7 @@ export default function ImportForm({ onImportComplete }) {
       setImportStatus("");
       setFolderUrl(""); // Clear the input field
       
-      // Remove from active imports after 30 seconds and show completion
+      // Remove from active imports after 7 seconds and show completion
       setTimeout(() => {
         setActiveImports(prev => prev.filter(imp => imp.id !== importId));
         // Remove from processed URLs after 5 minutes to allow re-import later
@@ -61,8 +61,8 @@ export default function ImportForm({ onImportComplete }) {
         setTimeout(() => {
           setMessage("");
           setMessageType("");
-        }, 5000);
-      }, 30000);
+        }, 7000);
+      }, 7000);
       
       if (onImportComplete) {
         onImportComplete();
