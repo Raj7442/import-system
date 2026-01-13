@@ -87,6 +87,7 @@ export default function ImageList({ refreshTrigger }) {
                 {formatFileSize(images.reduce((sum, img) => sum + (img.size || 0), 0))}
               </div>
               <div className="stat-label">Total Size</div>
+            </div>
             <div className="stat-item">
               <div className="stat-value">
                 <span className="live-indicator">•</span> Live
