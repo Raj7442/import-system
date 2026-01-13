@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { google } from "googleapis";
-import { Storage } from "@google-cloud/storage";
+import { v2 as cloudinary } from "cloudinary";
 import fetch from "node-fetch";
 import pkg from "pg";
 import { Buffer } from "buffer";
@@ -16,17 +16,16 @@ pool.on("error", (err) => {
   console.error("PostgreSQL connection error:", err);
 });
 
-/* -------------------- Google Cloud Storage -------------------- */
-if (!process.env.GOOGLE_API_KEY) {
-  console.warn("GOOGLE_API_KEY not set. Google Cloud Storage will fail.");
+/* -------------------- Cloudinary -------------------- */
+if (!process.env.CLOUDINARY_URL) {
+  console.warn("CLOUDINARY_URL not set. Image uploads will fail.");
 }
 
-const storage = new Storage({
-  keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Optional: for service account
-  projectId: process.env.GOOGLE_CLOUD_PROJECT_ID,
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
-const bucket = storage.bucket(process.env.GCS_BUCKET || 'image-import-bucket-2025');
 
 /* -------------------- Google Drive -------------------- */
 if (!process.env.GOOGLE_API_KEY) {
@@ -42,8 +41,9 @@ console.log("Worker starting...");
 console.log("Environment check:");
 console.log("  - DATABASE_URL:", process.env.DATABASE_URL ? "Set" : "Missing");
 console.log("  - GOOGLE_API_KEY:", process.env.GOOGLE_API_KEY ? "Set" : "Missing");
-console.log("  - GCS_BUCKET:", process.env.GCS_BUCKET ? "Set" : "Missing");
-console.log("  - GOOGLE_CLOUD_PROJECT_ID:", process.env.GOOGLE_CLOUD_PROJECT_ID ? "Set" : "Missing");
+console.log("  - CLOUDINARY_CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME ? "Set" : "Missing");
+console.log("  - CLOUDINARY_API_KEY:", process.env.CLOUDINARY_API_KEY ? "Set" : "Missing");
+console.log("  - CLOUDINARY_API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "Set" : "Missing");
 console.log("  - REDIS_URL:", process.env.REDIS_URL ? "Set" : "Missing");
 
 /* -------------------- BullMQ Worker -------------------- */
@@ -110,19 +110,20 @@ new Worker(
 
           const buffer = Buffer.from(await download.arrayBuffer());
 
-          // Upload to Google Cloud Storage
-          const fileName = `${folderId}/${file.id}_${file.name}`;
-          const gcsFile = bucket.file(fileName);
-          
-          await gcsFile.save(buffer, {
-            metadata: {
-              contentType: file.mimeType || 'image/jpeg',
-            },
-            public: true, // Make file publicly accessible
+          // Upload to Cloudinary
+          const uploadResult = await new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream(
+              {
+                resource_type: "image",
+                public_id: `${folderId}/${file.id}_${file.name.replace(/\.[^/.]+$/, "")}`,
+                folder: "imported-images",
+              },
+              (error, result) => {
+                if (error) reject(error);
+                else resolve(result);
+              }
+            ).end(buffer);
           });
-
-          // Get public URL
-          const publicUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
 
           await pool.query(
             `
@@ -141,7 +142,7 @@ new Worker(
               file.id,
               file.size || 0,
               file.mimeType || "image/jpeg",
-              publicUrl,
+              uploadResult.secure_url,
             ]
           );
 
